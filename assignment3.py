@@ -137,6 +137,7 @@ class MehrSteine(StochasticGame):
                 moves.append((index, (coordinates[0] + 1, coordinates[1])))
                 if coordinates[1] < self.board_size - 1:
                     moves.append((index, (coordinates[0] + 1, coordinates[1] + 1)))
+
             if coordinates[1] < self.board_size - 1:
                 moves.append((index, (coordinates[0], coordinates[1] + 1)))
         if to_move == 'B':
@@ -244,30 +245,35 @@ class MehrSteine(StochasticGame):
             opponent = 'B'
         else:
             opponent ='R'
+
+
+        print(self.num_piece)
         
         #get the dice roll, chance 
         piece_index = chance
         #find the piece to move 
         ##################should this be 1 or 0 ################
         #check if the piece is not on the board
+        lower_index = piece_index - 1 
+        higher_index = piece_index + 1
+
         if state.board[player][piece_index] is None:
-            #check one lower  
-            if piece_index >= 1 and state.board[player][piece_index -1] is not None: 
-                piece_index -= 1
-            #checks one higher
-            elif piece_index <= self.num_piece -2 and state.board[player][piece_index + 1] is not None: 
-                piece_index += 1
-            #if no valid piece just returns it 
-            else: 
-                opp_moves = self.compute_moves(state.board, opponent, piece_index)
-                #leave everything as is just swap the turn. 
-                return StochasticGameState(
-                    to_move = opponent,
-                    utility = state.utility, 
-                    board = state.board,
-                    moves = opp_moves,
-                    chance = chance
-                )
+            while lower_index >= 0 or  higher_index < self.num_piece - 1:
+            #check one lower and one higher, continue untill piece is found, if both found then concatinate both into one list of moves. 
+                #checks lower piece
+                if lower_index >= 0 and state.board[player][lower_index] is not None: 
+                    lower_moves = self.compute_moves(state.board, player, lower_index)
+
+                #checks for the higher piece. 
+                if higher_index < self.num_piece and state.board[player][higher_index] is not None: 
+                    higher_index = self.compute_moves(state.baord, player, higher_index)
+                
+
+                lower_index -= 1
+                higher_index += 1
+
+
+
             
         #compute the moves
         moves = self.compute_moves(state.board,player, piece_index)
