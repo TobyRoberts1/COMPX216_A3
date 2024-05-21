@@ -10,7 +10,7 @@ class EinStein(Game):
 
     def compute_moves(self, board, to_move):
         moves = []
-        if to_move == 'R':
+        if board[to_move]:
             if to_move == 'R':
                 if board[to_move][0] < 2:
                     moves.append((board[to_move][0] + 1, board[to_move][1]))
@@ -73,7 +73,7 @@ class EinStein(Game):
 
         
         
-        print(" op " + str(opponent) + "   util " + str(new_utility) + "   board " + str(new_board) + "   moves " + str(new_moves))
+        #print(" op " + str(opponent) + "   util " + str(new_utility) + "   board " + str(new_board) + "   moves " + str(new_moves))
 
         #return new game state
         return GameState(to_move = opponent,
@@ -162,6 +162,7 @@ class MehrSteine(StochasticGame):
 
     def actions(self, state):
         return state.moves
+
 
     def result(self, state, move):
         # Task 2.1
@@ -258,12 +259,13 @@ class MehrSteine(StochasticGame):
                 piece_index += 1
             #if no valid piece just returns it 
             else: 
+                opp_moves = self.compute_moves(state.board, opponent, piece_index)
                 #leave everything as is just swap the turn. 
                 return StochasticGameState(
                     to_move = opponent,
                     utility = state.utility, 
                     board = state.board,
-                    moves = [],
+                    moves = opp_moves,
                     chance = chance
                 )
             
@@ -283,7 +285,7 @@ class MehrSteine(StochasticGame):
         # Task 2.6
         # Return the probability of a chance outcome.
         # Replace the line below with your code.
-        raise NotImplementedError
+        return 1/self.num_piece
 
 def stochastic_monte_carlo_tree_search(state, game, playout_policy, N=1000):
 
@@ -391,7 +393,7 @@ def schwarz_mcts_player(game, state):
 if __name__ == '__main__':
 
     # Task 1 test code
-    '''
+    
     num_win = 0
     num_loss = 0
     for _ in range(50):
@@ -406,10 +408,10 @@ if __name__ == '__main__':
         else:
             num_win += 1
     print(f'alpha-beta pruned minimax player vs. random-move player: {num_win} wins and {num_loss} losses', end='\n\n')
-    '''
+    
 
     # Task 2 test code
-    
+
     num_win = 0
     num_loss = 0
     for _ in range(50):
