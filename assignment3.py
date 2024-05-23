@@ -160,7 +160,7 @@ class MehrSteine(StochasticGame):
         # Task 2.1
         # Return a state resulting from the move.
         # Replace the line below with your code.
-         # determine the player and the opponent in the state 
+        # determine the player and the opponent in the state 
         player = state.to_move
         if player == 'R':
             opponent = 'B'
@@ -184,7 +184,7 @@ class MehrSteine(StochasticGame):
                 new_board[opponent][opponent_index] = None  
             opponent_index += 1
 
-        # capture your own piece
+        # check to capture your own piece
         player_index = 0
         for player_pos in new_board[player]:
             if player_pos == (new_x, new_y) and player_index != index:
@@ -239,7 +239,7 @@ class MehrSteine(StochasticGame):
         # Task 2.5
         # Return a state resulting from the chance outcome.
         # Replace the line below with your code.
-        #who's turn 
+        #who's turn is it 
         player = state.to_move 
         if player == 'R':
             opponent = 'B'
@@ -250,7 +250,7 @@ class MehrSteine(StochasticGame):
         piece_index = chance
         #find the piece to move 
         ##################should this be 1 or 0 ################
-        #check if the piece is not on the board
+        # init everything that is needed
         lower_index = piece_index - 1 
         lower_moves = []
         higher_index = piece_index + 1
@@ -258,7 +258,7 @@ class MehrSteine(StochasticGame):
 
         new_moves = []
 
-
+	#check if the piece is not on the board
         if state.board[player][piece_index] is None:
             while lower_index >= 0:
             #check one lower and one higher, continue untill piece is found, if both found then concatinate both into one list of moves. 
@@ -281,12 +281,10 @@ class MehrSteine(StochasticGame):
             #combines the higher and lower moves. 
             new_moves = higher_moves + lower_moves     
         
+        #else just runs it with the choosen piece
         else: 
             
             new_moves = self.compute_moves(state.board, player, piece_index)
-            #print(" else" + str(new_moves))
-
-
 
         #return the new updated moves and state
         return StochasticGameState(
@@ -383,6 +381,7 @@ def schwarz_diff_to_weight(diff, max_schwarz):
     # Task 3
     # Return a weight value based on the relative difference in Schwarz scores.
     # Replace the line below with your code.
+    #calculates the correct score.
     score = diff/max_schwarz
 
     #checks all the diff/max_schwarz values then returns corrisponding weight
@@ -475,12 +474,12 @@ if __name__ == '__main__':
     
     num_win = 0
     num_loss = 0
-    for _ in range(50):
+    for _ in range(500):
         if MehrSteine(4).play_game(schwarz_mcts_player, random_mcts_player) == 1:
             num_win += 1
         else:
             num_loss += 1
-    for _ in range(50):
+    for _ in range(500):
         if MehrSteine(4).play_game(random_mcts_player, schwarz_mcts_player) == 1:
             num_loss += 1
         else:
