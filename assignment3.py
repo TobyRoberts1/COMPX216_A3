@@ -474,12 +474,12 @@ if __name__ == '__main__':
     
     num_win = 0
     num_loss = 0
-    for _ in range(500):
+    for _ in range(50):
         if MehrSteine(4).play_game(schwarz_mcts_player, random_mcts_player) == 1:
             num_win += 1
         else:
             num_loss += 1
-    for _ in range(500):
+    for _ in range(50):
         if MehrSteine(4).play_game(random_mcts_player, schwarz_mcts_player) == 1:
             num_loss += 1
         else:
