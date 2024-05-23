@@ -90,10 +90,10 @@ class EinStein(Game):
         blue_pos = board.get('B')
 
         #Create the board size always a 3x3 square 
-        board_size = 3
+        board = 3
 
         #red win 
-        if red_pos ==(board_size - 1, board_size -1):
+        if red_pos ==(board - 1, board-1):
             return 1
         if blue_pos is None: 
             return 1
@@ -184,11 +184,17 @@ class MehrSteine(StochasticGame):
                 new_board[opponent][opponent_index] = None  
             opponent_index += 1
 
+        # capture your own piece
+        player_index = 0
+        for player_pos in new_board[player]:
+            if player_pos == (new_x, new_y) and player_index != index:
+                new_board[player][player_index] = new_board[player][index] 
+            player_index += 1 
+
         #return new game state
         new_utility = self.compute_utility(new_board)
-        new_moves = self.compute_moves(new_board, opponent, 0)  # Compute initial moves for the opponent
 
-        return StochasticGameState(to_move=opponent, utility=new_utility, board=new_board, moves=new_moves, chance=None)
+        return StochasticGameState(to_move=opponent, utility=new_utility, board=new_board, moves=None, chance=None)
 
 
 
@@ -246,53 +252,45 @@ class MehrSteine(StochasticGame):
         ##################should this be 1 or 0 ################
         #check if the piece is not on the board
         lower_index = piece_index - 1 
+        lower_moves = []
         higher_index = piece_index + 1
+        higher_moves = []
 
         new_moves = []
 
+
         if state.board[player][piece_index] is None:
-            while lower_index >= 0 and higher_index < self.num_piece - 1 and lower_moves is None and higher_moves is None:
+            while lower_index >= 0:
             #check one lower and one higher, continue untill piece is found, if both found then concatinate both into one list of moves. 
                 #checks lower piece
                 if lower_index >= 0 and state.board[player][lower_index] is not None: 
                     lower_moves = self.compute_moves(state.board, player, lower_index)
-
+                    #print(" lower loop")
+                    break
+                lower_index -= 1
+                      
+            #runs until finds a higher piece, or runs out of higher pieces. 
+            while higher_index <= self.num_piece -1:
                 #checks for the higher piece. 
                 if higher_index < self.num_piece and state.board[player][higher_index] is not None: 
-                    higher_moves = self.compute_moves(state.baord, player, higher_index)
-                
-                new_moves = higher_moves + lower_moves 
-
-                print(" insidewhile " + str(new_moves) )
-
-                lower_index -= 1
+                    higher_moves = self.compute_moves(state.board, player, higher_index)
+                    #print("higher loop")
+                    break
                 higher_index += 1
+
+            #combines the higher and lower moves. 
+            new_moves = higher_moves + lower_moves     
         
         else: 
             
             new_moves = self.compute_moves(state.board, player, piece_index)
-            print(" else" + str(new_moves))
+            #print(" else" + str(new_moves))
 
-            
-        # #compute the moves
-        # if state.board[player][piece_index] is None:
-        #     lower_index = piece_index - 1
-        #     higher_index = piece_index + 1
-        #     while lower_index >= 0 or higher_index < self.num_piece:
-        #         if lower_index >= 0 and state.board[player][lower_index] is not None:
-        #             piece_index = lower_index
-        #             break
-        #         if higher_index < self.num_piece and state.board[player][higher_index] is not None:
-        #             piece_index = higher_index
-        #             break
-        #         lower_index -= 1
-        #         higher_index += 1
-        # moves = self.compute_moves(state.board, player, piece_index)
 
 
         #return the new updated moves and state
         return StochasticGameState(
-                    to_move = opponent,
+                    to_move = player,
                     utility = state.utility, 
                     board = state.board,
                     moves = new_moves,
@@ -385,7 +383,35 @@ def schwarz_diff_to_weight(diff, max_schwarz):
     # Task 3
     # Return a weight value based on the relative difference in Schwarz scores.
     # Replace the line below with your code.
-    raise NotImplementedError
+    score = diff/max_schwarz
+
+    #checks all the diff/max_schwarz values then returns corrisponding weight
+    if score < -0.5:
+        return 1
+    elif score < -0.375:
+        return 2
+    elif score < -0.25:
+        return 4
+    elif score < -0.125:
+        return 8
+    elif score < 0:
+        return 16
+    elif score < 0.125:
+        return 32
+    elif score < 0.25:
+        return 64
+    elif score < 0.375:
+        return 128
+    elif score < 0.5:
+        return 256
+    else:
+        return 512
+        
+
+
+
+
+
 
 def random_policy(game, state):
     return random.choice(list(game.actions(state)))
@@ -446,7 +472,7 @@ if __name__ == '__main__':
     
 
     # Task 3 test code
-    '''
+    
     num_win = 0
     num_loss = 0
     for _ in range(50):
@@ -460,4 +486,4 @@ if __name__ == '__main__':
         else:
             num_win += 1
     print(f'MCTS with Schwarz-based playout vs. MCTS with random playout: {num_win} wins and {num_loss} losses', end='\n\n')
-    '''
+    
