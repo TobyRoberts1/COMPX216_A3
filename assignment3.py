@@ -55,11 +55,6 @@ class EinStein(Game):
         #make a deep copy of the board 
         new_board = deepcopy(state.board)
 
-        # excute the move if capture player make them none. 
-        # check if is a illegal move 
-        # if move not in state.moves: 
-        #     return state  #if illegal move does nothing.
-
         #executes the move on the board 
         new_board[player] = move 
         
@@ -72,9 +67,6 @@ class EinStein(Game):
         new_moves = self.compute_moves(new_board, opponent)
 
         
-        
-        #print(" op " + str(opponent) + "   util " + str(new_utility) + "   board " + str(new_board) + "   moves " + str(new_moves))
-
         #return new game state
         return GameState(to_move = opponent,
                          utility = new_utility,
@@ -137,7 +129,6 @@ class MehrSteine(StochasticGame):
                 moves.append((index, (coordinates[0] + 1, coordinates[1])))
                 if coordinates[1] < self.board_size - 1:
                     moves.append((index, (coordinates[0] + 1, coordinates[1] + 1)))
-
             if coordinates[1] < self.board_size - 1:
                 moves.append((index, (coordinates[0], coordinates[1] + 1)))
         if to_move == 'B':
@@ -194,8 +185,11 @@ class MehrSteine(StochasticGame):
             opponent_index += 1
 
         #return new game state
-        return StochasticGameState(to_move = opponent, utility = 0, board = new_board, moves = None, chance = None)
-    
+        new_utility = self.compute_utility(new_board)
+        new_moves = self.compute_moves(new_board, opponent, 0)  # Compute initial moves for the opponent
+
+        return StochasticGameState(to_move=opponent, utility=new_utility, board=new_board, moves=new_moves, chance=None)
+
 
 
     def utility(self, state, player):
@@ -245,9 +239,6 @@ class MehrSteine(StochasticGame):
             opponent = 'B'
         else:
             opponent ='R'
-
-
-        print(self.num_piece)
         
         #get the dice roll, chance 
         piece_index = chance
@@ -257,8 +248,10 @@ class MehrSteine(StochasticGame):
         lower_index = piece_index - 1 
         higher_index = piece_index + 1
 
+        new_moves = []
+
         if state.board[player][piece_index] is None:
-            while lower_index >= 0 or  higher_index < self.num_piece - 1:
+            while lower_index >= 0 and higher_index < self.num_piece - 1 and lower_moves is None and higher_moves is None:
             #check one lower and one higher, continue untill piece is found, if both found then concatinate both into one list of moves. 
                 #checks lower piece
                 if lower_index >= 0 and state.board[player][lower_index] is not None: 
@@ -266,24 +259,43 @@ class MehrSteine(StochasticGame):
 
                 #checks for the higher piece. 
                 if higher_index < self.num_piece and state.board[player][higher_index] is not None: 
-                    higher_index = self.compute_moves(state.baord, player, higher_index)
+                    higher_moves = self.compute_moves(state.baord, player, higher_index)
                 
+                new_moves = higher_moves + lower_moves 
+
+                print(" insidewhile " + str(new_moves) )
 
                 lower_index -= 1
                 higher_index += 1
-
-
+        
+        else: 
+            
+            new_moves = self.compute_moves(state.board, player, piece_index)
+            print(" else" + str(new_moves))
 
             
-        #compute the moves
-        moves = self.compute_moves(state.board,player, piece_index)
+        # #compute the moves
+        # if state.board[player][piece_index] is None:
+        #     lower_index = piece_index - 1
+        #     higher_index = piece_index + 1
+        #     while lower_index >= 0 or higher_index < self.num_piece:
+        #         if lower_index >= 0 and state.board[player][lower_index] is not None:
+        #             piece_index = lower_index
+        #             break
+        #         if higher_index < self.num_piece and state.board[player][higher_index] is not None:
+        #             piece_index = higher_index
+        #             break
+        #         lower_index -= 1
+        #         higher_index += 1
+        # moves = self.compute_moves(state.board, player, piece_index)
+
 
         #return the new updated moves and state
         return StochasticGameState(
                     to_move = opponent,
                     utility = state.utility, 
                     board = state.board,
-                    moves = moves,
+                    moves = new_moves,
                     chance = chance
                 )
 
